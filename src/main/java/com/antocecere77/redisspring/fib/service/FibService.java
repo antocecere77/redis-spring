@@ -1,5 +1,6 @@
 package com.antocecere77.redisspring.fib.service;
 
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -7,9 +8,15 @@ import org.springframework.stereotype.Service;
 public class FibService {
 
     @Cacheable(value = "math:fib", key = "#index")
-    public int getFib(int index, String name) {
-        System.out.println("calculating fib for " + index + ", name " + name);
+    public int getFib(int index) {
+        System.out.println("calculating fib for " + index);
         return this.fib(index);
+    }
+
+    // PUT, POST, PATCH, DELETE
+    @CacheEvict(value = "math:fib", key = "#index")
+    public void clearCache(int index) {
+        System.out.println("Clearing hash key");
     }
 
     //intentional 2^N
