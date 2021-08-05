@@ -6,9 +6,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class FibService {
 
-    @Cacheable("math:fib")
-    public int getFib(int index) {
-        System.out.println("calculating fib for " + index);
+    @Cacheable(value = "math:fib", key = "#index")
+    public int getFib(int index, String name) {
+        System.out.println("calculating fib for " + index + ", name " + name);
         return this.fib(index);
     }
 
