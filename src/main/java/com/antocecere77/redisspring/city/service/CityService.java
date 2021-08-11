@@ -34,7 +34,7 @@ public class CityService {
                 .onErrorResume(ex -> this.cityClient.getCity(zipCode));
     }
 
-    @Scheduled(fixedRate = 10_000)
+    //@Scheduled(fixedRate = 10_000)
     public void updateCity() {
         this.cityClient.getAll()
                 .collectList()
