@@ -1,9 +1,11 @@
 package com.antocecere77.redisspring.chat.service;
 
 import lombok.RequiredArgsConstructor;
+import org.redisson.api.RListReactive;
 import org.redisson.api.RTopicReactive;
 import org.redisson.api.RedissonReactiveClient;
 import org.redisson.client.codec.StringCodec;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.WebSocketMessage;
@@ -22,20 +24,20 @@ public class ChatRoomService implements WebSocketHandler {
 
     @Override
     public Mono<Void> handle(WebSocketSession webSocketSession) {
-
-        String room = getChatRoom(webSocketSession);
+        String room = getChatRoomName(webSocketSession);
         RTopicReactive topic = this.client.getTopic(room, StringCodec.INSTANCE);
-
-        //subscribe
+        RListReactive<String> list = this.client.getList("history:" + room, StringCodec.INSTANCE);
+        // subscribe
         webSocketSession.receive()
-            .doOnNext(WebSocketMessage::getPayloadAsText)
-            .flatMap(topic::publish)
-            .doOnError(System.out::println)
-            .doFinally(s -> System.out.println("subscriber finally " + s))
-            .subscribe();
+                .map(WebSocketMessage::getPayloadAsText)
+                .flatMap(msg -> list.add(msg).then(topic.publish(msg)))
+                .doOnError(System.out::println)
+                .doFinally(s -> System.out.println("Subscriber finally " + s))
+                .subscribe();
 
-        //publisher
+        // publisher
         Flux<WebSocketMessage> flux = topic.getMessages(String.class)
+                .startWith(list.iterator())
                 .map(webSocketSession::textMessage)
                 .doOnError(System.out::println)
                 .doFinally(s -> System.out.println("publisher finally " + s));
@@ -43,7 +45,7 @@ public class ChatRoomService implements WebSocketHandler {
         return webSocketSession.send(flux);
     }
 
-    private String getChatRoom(WebSocketSession socketSession) {
+    private String getChatRoomName(WebSocketSession socketSession){
         URI uri = socketSession.getHandshakeInfo().getUri();
         return UriComponentsBuilder.fromUri(uri)
                 .build()
@@ -51,15 +53,8 @@ public class ChatRoomService implements WebSocketHandler {
                 .toSingleValueMap()
                 .getOrDefault("room", "default");
     }
+
 }
-
-
-
-
-
-
-
-
 
 
 
