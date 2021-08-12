@@ -32,7 +32,7 @@
             Start button should initiate this websocket connection
             You can add logic not to enable this button when one or both - name and room fields are blank
          -->
-        <div class="mb-3" id="start-control">
+        <div class="mb-3" id="start-control" class = "invisible">
               <button class="form-control btn btn-secondary" type="button" id="start">Start</button>
         </div>
 
@@ -40,7 +40,7 @@
            Show this div only when start button is pressed.
         -->
 
-        <div id="chat-div">
+        <div id="chat-div" class = "invisible">
 
             <!-- All chat messages will be appended here -->
             
@@ -65,10 +65,23 @@
     <!-- Add the js to send and receive messages  -->
 
     <script>
+        // will be executed after pressing start button
+        const chatFunction = () => {
 
-   
-      // TO-DO
+          // elements
+          const name = document.getElementById('name').value;
+          const room = document.getElementById('room').value;
+          const history = document.getElementById('history');
+          const message = document.getElementById('message');
+          const send = document.getElementById('send');
+          const chatDiv = document.getElementById('chat-div');
+          const startControl = document.getElementById('start-control');
 
+          chatDiv.classList.remove("invisible");
+          startControl.classList.add("invisible");
+        }
+
+        document.getElementById('start').addEventListener('click', chatFunction);
 
     </script>
 
