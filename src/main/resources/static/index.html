@@ -79,6 +79,40 @@
 
           chatDiv.classList.remove("invisible");
           startControl.classList.add("invisible");
+
+          // ws://localhost:8080/chat?room=some-name
+          const uri = `ws://${window.location.hostname}:${window.location.port}/chat?room=${room}`;
+
+          websocket = new WebSocket(uri);
+
+          // onmessage
+          // onopen
+          // onclose
+          /*
+              {
+                "sender":...
+                "message": ...
+              }
+          */
+
+          websocket.onmessage = (evt) => {
+            let obj = JSON.parse(evt.data);
+            let ele = document.createElement("p");
+            ele.innerHTML = `<b>${obj.sender}:</b>&nbsp; ${obj.message}`;
+            history.appendChild(ele);
+          }
+
+          websocket.onopen = (evt) => {
+              let ele = document.createElement("p");
+              ele.innerHTML = `<b>CONNECTED</b>`;
+              history.appendChild(ele);
+          }
+
+          websocket.onclose = (evt) => {
+              let ele = document.createElement("p");
+              ele.innerHTML = `<b>DISCONNECTED</b>`;
+              history.appendChild(ele);
+          }
         }
 
         document.getElementById('start').addEventListener('click', chatFunction);
